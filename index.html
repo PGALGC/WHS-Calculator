@@ -561,17 +561,10 @@
                         </div>
                     </div>
                     
-                    <div class="input-group">
-                        <label for="phc"><i class="fas fa-percent"></i> PHC (OPTIONAL)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="phc" step="0.1" min="0" max="54" placeholder="Playing handicap if known">
-                        </div>
-                    </div>
-                    
                     <div class="input-group full-width">
                         <label for="percentage"><i class="fas fa-percentage"></i> PHC PERCENTAGE</label>
                         <div class="percentage-input">
-                            <input type="number" id="percentage" min="1" max="100" value="85" placeholder="Enter percentage (1-100)">
+                            <input type="number" id="percentage" min="1" max="100" value="100" placeholder="Enter percentage (1-100)">
                             <span class="percentage-suffix">%</span>
                         </div>
                     </div>
@@ -605,7 +598,7 @@
                         <div class="result-title">
                             <i class="fas fa-percentage"></i> PLAYING HANDICAP
                         </div>
-                        <div class="result-value" id="playing-handicap">12</div>
+                        <div class="result-value" id="playing-handicap">14</div>
                         <div class="result-subtitle">After applying percentage adjustment</div>
                     </div>
                     
@@ -621,22 +614,22 @@
                         
                         <div class="detail-row">
                             <span class="detail-label">Applied Percentage:</span>
-                            <span class="detail-value" id="detail-percentage">85%</span>
+                            <span class="detail-value" id="detail-percentage">100%</span>
                         </div>
                         
                         <div class="detail-row">
                             <span class="detail-label">Playing Handicap:</span>
-                            <span class="detail-value" id="detail-playing-handicap">12.2</span>
+                            <span class="detail-value" id="detail-playing-handicap">14.4</span>
                         </div>
                         
                         <div class="detail-row">
                             <span class="detail-label">Rounded Playing H'cap:</span>
-                            <span class="detail-value" id="detail-rounded">12.2 → 12</span>
+                            <span class="detail-value" id="detail-rounded">14.4 → 14</span>
                         </div>
                         
                         <div class="detail-row">
                             <span class="detail-label">Strokes Received:</span>
-                            <span class="detail-value" id="detail-strokes">12</span>
+                            <span class="detail-value" id="detail-strokes">14</span>
                         </div>
                     </div>
                 </div>
@@ -654,7 +647,6 @@
         const courseRatingInput = document.getElementById('course-rating');
         const slopeInput = document.getElementById('slope');
         const parInput = document.getElementById('par');
-        const phcInput = document.getElementById('phc');
         const percentageInput = document.getElementById('percentage');
         const calculateBtn = document.getElementById('calculate');
         const resetBtn = document.getElementById('reset');
@@ -726,7 +718,7 @@
         });
         
         // Also calculate when Enter is pressed in any input field
-        [indexInput, courseRatingInput, slopeInput, parInput, phcInput, percentageInput].forEach(input => {
+        [indexInput, courseRatingInput, slopeInput, parInput, percentageInput].forEach(input => {
             input.addEventListener('keyup', function(event) {
                 if (event.key === 'Enter') {
                     calculateBtn.classList.add('loading');
@@ -744,14 +736,13 @@
             courseRatingInput.value = '';
             slopeInput.value = '';
             parInput.value = '';
-            phcInput.value = '';
-            percentageInput.value = 85;
+            percentageInput.value = 100;
             
             // Reset results
             courseHandicapEl.textContent = '--';
             playingHandicapEl.textContent = '--';
             detailCourseHandicapEl.textContent = '--';
-            detailPercentageEl.textContent = '85%';
+            detailPercentageEl.textContent = '100%';
             detailPlayingHandicapEl.textContent = '--';
             detailRoundedEl.textContent = '--';
             detailStrokesEl.textContent = '--';
@@ -764,14 +755,13 @@
             const courseRating = parseFloat(courseRatingInput.value) || 0;
             const slope = parseFloat(slopeInput.value) || 113; // Default to 113 if not entered
             const par = parseFloat(parInput.value) || 72; // Default to 72 if not entered
-            const phc = parseFloat(phcInput.value) || 0;
-            let percentage = parseFloat(percentageInput.value) || 85;
+            let percentage = parseFloat(percentageInput.value) || 100;
             
             // Validate percentage
             if (percentage < 1 || percentage > 100) {
                 alert("Percentage must be between 1 and 100");
-                percentageInput.value = 85;
-                percentage = 85;
+                percentageInput.value = 100;
+                percentage = 100;
             }
             
             // Validate inputs
@@ -789,11 +779,6 @@
             
             // Calculate course handicap: Index × (Slope ÷ 113)
             let courseHandicap = index * (slope / 113);
-            
-            // If PHC is provided, use it as course handicap
-            if (phc > 0) {
-                courseHandicap = phc;
-            }
             
             // Calculate playing handicap: Course Handicap × Percentage
             let playingHandicap = courseHandicap * (percentage / 100);
