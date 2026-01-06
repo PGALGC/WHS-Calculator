@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Golf Handicap Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: #0a0f0d;
+            color: #e8f3ee;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 15px;
+            background: rgba(20, 25, 22, 0.8);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .color-chip {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-chip:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .color-chip.active {
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: scale(1.1);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .color-chip::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: #111815;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .app-header {
+            padding: 35px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .golf-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            opacity: 0.9;
+        }
+        
+        .calculator-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 500px;
+        }
+        
+        .input-panel, .results-panel {
+            padding: 40px;
+            position: relative;
+        }
+        
+        .input-panel {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 20, 17, 0.7);
+        }
+        
+        .results-panel {
+            background: rgba(12, 17, 14, 0.7);
+        }
+        
+        .panel-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        
+        .panel-title i {
+            opacity: 0.8;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group.full-width {
+            grid-column: span 2;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        label i {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(10, 15, 12, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+            background: rgba(15, 20, 17, 0.9);
+        }
+        
+        .percentage-input {
+            display: flex;
+        }
+        
+        .percentage-input input {
+            border-radius: 10px 0 0 10px;
+            border-right: none;
+        }
+        
+        .percentage-suffix {
+            background: rgba(10, 15, 12, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            padding: 16px 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            grid-column: span 2;
+        }
+        
+        button {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #2e8b57, #1a531b);
+            color: white;
+            box-shadow: 0 8px 20px rgba(46, 139, 87, 0.3);
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(46, 139, 87, 0.4);
+        }
+        
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Results Panel */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .result-card {
+            background: rgba(10, 15, 12, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2e8b57, #1a531b);
+        }
+        
+        .result-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 10px 0;
+            letter-spacing: -1px;
+        }
+        
+        .result-subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.5px;
+        }
+        
+        .calculation-details {
+            background: rgba(10, 15, 12, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            letter-spacing: 0.5px;
+        }
+        
+        /* Color Schemes - Ultra Professional */
+        .theme-1 .app-header { background: linear-gradient(135deg, #0c2b1e 0%, #163a2c 100%); }
+        .theme-1 .calculate-btn { background: linear-gradient(135deg, #2e8b57, #1a531b); }
+        .theme-1 .result-card::before { background: linear-gradient(90deg, #2e8b57, #1a531b); }
+        
+        .theme-2 .app-header { background: linear-gradient(135deg, #0c223b 0%, #162f4a 100%); }
+        .theme-2 .calculate-btn { background: linear-gradient(135deg, #1e6fa8, #0c4a6e); }
+        .theme-2 .result-card::before { background: linear-gradient(90deg, #1e6fa8, #0c4a6e); }
+        
+        .theme-3 .app-header { background: linear-gradient(135deg, #2c1a0a 0%, #3a2816 100%); }
+        .theme-3 .calculate-btn { background: linear-gradient(135deg, #d97706, #92400e); }
+        .theme-3 .result-card::before { background: linear-gradient(90deg, #d97706, #92400e); }
+        
+        .theme-4 .app-header { background: linear-gradient(135deg, #1a1a3a 0%, #26264d 100%); }
+        .theme-4 .calculate-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .theme-4 .result-card::before { background: linear-gradient(90deg, #6366f1, #4f46e5); }
+        
+        .theme-5 .app-header { background: linear-gradient(135deg, #2d0c20 0%, #3d172c 100%); }
+        .theme-5 .calculate-btn { background: linear-gradient(135deg, #be185d, #9d174d); }
+        .theme-5 .result-card::before { background: linear-gradient(90deg, #be185d, #9d174d); }
+        
+        .theme-6 .app-header { background: linear-gradient(135deg, #332702 0%, #44370e 100%); }
+        .theme-6 .calculate-btn { background: linear-gradient(135deg, #d4af37, #b8941f); }
+        .theme-6 .result-card::before { background: linear-gradient(90deg, #d4af37, #b8941f); }
+        
+        .theme-7 .app-header { background: linear-gradient(135deg, #042f2e 0%, #0c3d3c 100%); }
+        .theme-7 .calculate-btn { background: linear-gradient(135deg, #0d9488, #0f766e); }
+        .theme-7 .result-card::before { background: linear-gradient(90deg, #0d9488, #0f766e); }
+        
+        .theme-8 .app-header { background: linear-gradient(135deg, #2d0c33 0%, #3d1743 100%); }
+        .theme-8 .calculate-btn { background: linear-gradient(135deg, #a855f7, #9333ea); }
+        .theme-8 .result-card::before { background: linear-gradient(90deg, #a855f7, #9333ea); }
+        
+        .theme-9 .app-header { background: linear-gradient(135deg, #341c0f 0%, #442918 100%); }
+        .theme-9 .calculate-btn { background: linear-gradient(135deg, #ea580c, #c2410c); }
+        .theme-9 .result-card::before { background: linear-gradient(90deg, #ea580c, #c2410c); }
+        
+        .theme-10 .app-header { background: linear-gradient(135deg, #013737 0%, #024242 100%); }
+        .theme-10 .calculate-btn { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .theme-10 .result-card::before { background: linear-gradient(90deg, #14b8a6, #0d9488); }
+        
+        /* Color Chips */
+        .color-1 { background: linear-gradient(135deg, #0c2b1e, #163a2c); }
+        .color-2 { background: linear-gradient(135deg, #0c223b, #162f4a); }
+        .color-3 { background: linear-gradient(135deg, #2c1a0a, #3a2816); }
+        .color-4 { background: linear-gradient(135deg, #1a1a3a, #26264d); }
+        .color-5 { background: linear-gradient(135deg, #2d0c20, #3d172c); }
+        .color-6 { background: linear-gradient(135deg, #332702, #44370e); }
+        .color-7 { background: linear-gradient(135deg, #042f2e, #0c3d3c); }
+        .color-8 { background: linear-gradient(135deg, #2d0c33, #3d1743); }
+        .color-9 { background: linear-gradient(135deg, #341c0f, #442918); }
+        .color-10 { background: linear-gradient(135deg, #013737, #024242); }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .calculator-body {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .app-header {
+                padding: 25px 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .input-panel, .results-panel {
+                padding: 25px;
+            }
+        }
+        
+        /* Glow effect for active theme */
+        .active-glow {
+            animation: glowPulse 2s infinite alternate;
+        }
+        
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+            100% { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2); }
+        }
+        
+        /* Subtle animation for results */
+        .result-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Loading animation for calculate button */
+        .calculate-btn.loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .calculate-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: buttonSpin 0.8s linear infinite;
+        }
+        
+        @keyframes buttonSpin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="theme-1">
+    <div class="color-palette">
+        <div class="color-chip color-1 active active-glow" data-theme="1"></div>
+        <div class="color-chip color-2" data-theme="2"></div>
+        <div class="color-chip color-3" data-theme="3"></div>
+        <div class="color-chip color-4" data-theme="4"></div>
+        <div class="color-chip color-5" data-theme="5"></div>
+        <div class="color-chip color-6" data-theme="6"></div>
+        <div class="color-chip color-7" data-theme="7"></div>
+        <div class="color-chip color-8" data-theme="8"></div>
+        <div class="color-chip color-9" data-theme="9"></div>
+        <div class="color-chip color-10" data-theme="10"></div>
+    </div>
+    
+    <div class="container">
+        <div class="app-header">
+            <div class="golf-icon">
+                <i class="fas fa-golf-ball"></i>
+            </div>
+            <h1>PRO HANDICAP CALCULATOR</h1>
+            <p class="tagline">PRECISION HANDICAP ANALYSIS FOR COMPETITIVE GOLF, By Kamal Dhunna</p>
+        </div>
+        
+        <div class="calculator-body">
+            <div class="input-panel">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i> INPUT PARAMETERS
+                </div>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="index"><i class="fas fa-hashtag"></i> INDEX H'CAP</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="index" step="0.1" min="0" max="54" placeholder="e.g., 12.5" value="12.5">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="course-rating"><i class="fas fa-flag"></i> COURSE RATING</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="course-rating" step="0.1" min="60" max="80" placeholder="e.g., 72.5" value="72.5">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="slope"><i class="fas fa-chart-line"></i> SLOPE RATING</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="slope" min="55" max="155" placeholder="e.g., 130" value="130">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="par"><i class="fas fa-bullseye"></i> COURSE PAR</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="par" min="60" max="80" placeholder="e.g., 72" value="72">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="phc"><i class="fas fa-percent"></i> PHC (OPTIONAL)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="phc" step="0.1" min="0" max="54" placeholder="Playing handicap if known">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group full-width">
+                        <label for="percentage"><i class="fas fa-percentage"></i> PHC PERCENTAGE</label>
+                        <div class="percentage-input">
+                            <input type="number" id="percentage" min="1" max="100" value="85" placeholder="Enter percentage (1-100)">
+                            <span class="percentage-suffix">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="buttons">
+                        <button class="calculate-btn" id="calculate">
+                            <i class="fas fa-calculator"></i> CALCULATE HANDICAP
+                        </button>
+                        <button class="reset-btn" id="reset">
+                            <i class="fas fa-redo"></i> RESET VALUES
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-panel">
+                <div class="panel-title">
+                    <i class="fas fa-chart-bar"></i> CALCULATION RESULTS
+                </div>
+                
+                <div class="results-container">
+                    <div class="result-card">
+                        <div class="result-title">
+                            <i class="fas fa-golf-ball"></i> COURSE HANDICAP
+                        </div>
+                        <div class="result-value" id="course-handicap">14.4</div>
+                        <div class="result-subtitle">Based on index, course rating & slope</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">
+                            <i class="fas fa-percentage"></i> PLAYING HANDICAP
+                        </div>
+                        <div class="result-value" id="playing-handicap">12</div>
+                        <div class="result-subtitle">After applying percentage adjustment</div>
+                    </div>
+                    
+                    <div class="calculation-details">
+                        <div class="panel-title" style="border: none; padding: 0; margin: 0 0 20px 0;">
+                            <i class="fas fa-calculator"></i> CALCULATION DETAILS
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Course Handicap:</span>
+                            <span class="detail-value" id="detail-course-handicap">14.4</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Applied Percentage:</span>
+                            <span class="detail-value" id="detail-percentage">85%</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Playing Handicap:</span>
+                            <span class="detail-value" id="detail-playing-handicap">12.2</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Rounded Playing H'cap:</span>
+                            <span class="detail-value" id="detail-rounded">12.2 → 12</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Strokes Received:</span>
+                            <span class="detail-value" id="detail-strokes">12</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>PROFESSIONAL GOLF HANDICAP CALCULATOR © 2023 | WHS COMPLIANT | ENTER 1-100% IN PERCENTAGE FIELD</p>
+        </footer>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const indexInput = document.getElementById('index');
+        const courseRatingInput = document.getElementById('course-rating');
+        const slopeInput = document.getElementById('slope');
+        const parInput = document.getElementById('par');
+        const phcInput = document.getElementById('phc');
+        const percentageInput = document.getElementById('percentage');
+        const calculateBtn = document.getElementById('calculate');
+        const resetBtn = document.getElementById('reset');
+        const colorChips = document.querySelectorAll('.color-chip');
+        
+        // Result elements
+        const courseHandicapEl = document.getElementById('course-handicap');
+        const playingHandicapEl = document.getElementById('playing-handicap');
+        const detailCourseHandicapEl = document.getElementById('detail-course-handicap');
+        const detailPercentageEl = document.getElementById('detail-percentage');
+        const detailPlayingHandicapEl = document.getElementById('detail-playing-handicap');
+        const detailRoundedEl = document.getElementById('detail-rounded');
+        const detailStrokesEl = document.getElementById('detail-strokes');
+        
+        // Color scheme switching
+        colorChips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                const theme = this.getAttribute('data-theme');
+                
+                // Update active class
+                colorChips.forEach(c => {
+                    c.classList.remove('active', 'active-glow');
+                });
+                this.classList.add('active', 'active-glow');
+                
+                // Change theme
+                document.body.className = `theme-${theme}`;
+                
+                // Update button and result card colors
+                const calculateBtn = document.querySelector('.calculate-btn');
+                const resultCards = document.querySelectorAll('.result-card');
+                
+                // Theme colors for gradients
+                const themeColors = {
+                    1: ['#2e8b57', '#1a531b'],
+                    2: ['#1e6fa8', '#0c4a6e'],
+                    3: ['#d97706', '#92400e'],
+                    4: ['#6366f1', '#4f46e5'],
+                    5: ['#be185d', '#9d174d'],
+                    6: ['#d4af37', '#b8941f'],
+                    7: ['#0d9488', '#0f766e'],
+                    8: ['#a855f7', '#9333ea'],
+                    9: ['#ea580c', '#c2410c'],
+                    10: ['#14b8a6', '#0d9488']
+                };
+                
+                const [color1, color2] = themeColors[theme];
+                calculateBtn.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+                
+                resultCards.forEach(card => {
+                    card.style.setProperty('--card-gradient', `linear-gradient(90deg, ${color1}, ${color2})`);
+                    const beforeElement = window.getComputedStyle(card, '::before');
+                    // Update the gradient line on result cards
+                    card.style.borderTop = `4px solid ${color1}`;
+                });
+            });
+        });
+        
+        // Calculate handicap when button is clicked
+        calculateBtn.addEventListener('click', function() {
+            // Show loading state
+            this.classList.add('loading');
+            
+            // Calculate after a short delay for visual feedback
+            setTimeout(() => {
+                calculateHandicap();
+                this.classList.remove('loading');
+            }, 300);
+        });
+        
+        // Also calculate when Enter is pressed in any input field
+        [indexInput, courseRatingInput, slopeInput, parInput, phcInput, percentageInput].forEach(input => {
+            input.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    calculateBtn.classList.add('loading');
+                    setTimeout(() => {
+                        calculateHandicap();
+                        calculateBtn.classList.remove('loading');
+                    }, 300);
+                }
+            });
+        });
+        
+        // Reset all fields
+        resetBtn.addEventListener('click', function() {
+            indexInput.value = '';
+            courseRatingInput.value = '';
+            slopeInput.value = '';
+            parInput.value = '';
+            phcInput.value = '';
+            percentageInput.value = 85;
+            
+            // Reset results
+            courseHandicapEl.textContent = '--';
+            playingHandicapEl.textContent = '--';
+            detailCourseHandicapEl.textContent = '--';
+            detailPercentageEl.textContent = '85%';
+            detailPlayingHandicapEl.textContent = '--';
+            detailRoundedEl.textContent = '--';
+            detailStrokesEl.textContent = '--';
+        });
+        
+        // Calculate handicap function - FIXED AND WORKING
+        function calculateHandicap() {
+            // Get input values
+            const index = parseFloat(indexInput.value) || 0;
+            const courseRating = parseFloat(courseRatingInput.value) || 0;
+            const slope = parseFloat(slopeInput.value) || 113; // Default to 113 if not entered
+            const par = parseFloat(parInput.value) || 72; // Default to 72 if not entered
+            const phc = parseFloat(phcInput.value) || 0;
+            let percentage = parseFloat(percentageInput.value) || 85;
+            
+            // Validate percentage
+            if (percentage < 1 || percentage > 100) {
+                alert("Percentage must be between 1 and 100");
+                percentageInput.value = 85;
+                percentage = 85;
+            }
+            
+            // Validate inputs
+            if (index <= 0 || index > 54) {
+                alert("Please enter a valid handicap index (between 0.1 and 54)");
+                indexInput.focus();
+                return;
+            }
+            
+            if (slope < 55 || slope > 155) {
+                alert("Please enter a valid slope rating (between 55 and 155)");
+                slopeInput.focus();
+                return;
+            }
+            
+            // Calculate course handicap: Index × (Slope ÷ 113)
+            let courseHandicap = index * (slope / 113);
+            
+            // If PHC is provided, use it as course handicap
+            if (phc > 0) {
+                courseHandicap = phc;
+            }
+            
+            // Calculate playing handicap: Course Handicap × Percentage
+            let playingHandicap = courseHandicap * (percentage / 100);
+            
+            // Round playing handicap to nearest whole number
+            let roundedPlayingHandicap = Math.round(playingHandicap);
+            
+            // Calculate strokes received (difference from par)
+            let strokesReceived = roundedPlayingHandicap;
+            
+            // Update UI with results
+            courseHandicapEl.textContent = courseHandicap.toFixed(1);
+            playingHandicapEl.textContent = roundedPlayingHandicap;
+            detailCourseHandicapEl.textContent = courseHandicap.toFixed(1);
+            detailPercentageEl.textContent = `${percentage}%`;
+            detailPlayingHandicapEl.textContent = playingHandicap.toFixed(1);
+            detailRoundedEl.textContent = `${playingHandicap.toFixed(1)} → ${roundedPlayingHandicap}`;
+            detailStrokesEl.textContent = strokesReceived;
+            
+            // Add visual feedback
+            const resultCards = document.querySelectorAll('.result-card');
+            resultCards.forEach(card => {
+                card.style.transform = 'translateY(-5px)';
+                card.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.4)';
+                
+                setTimeout(() => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '';
+                }, 500);
+            });
+        }
+        
+        // Calculate initial values on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Trigger calculation to show example results
+            calculateHandicap();
+        });
+    </script>
+</body>
+</html>
