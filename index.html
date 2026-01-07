@@ -559,21 +559,21 @@
                     <div class="input-group">
                         <label for="course-rating"><i class="fas fa-flag"></i> COURSE RATING</label>
                         <div class="input-wrapper">
-                            <input type="number" id="course-rating" step="0.1" min="60" max="80" placeholder="e.g., 71.5">
+                            <input type="number" id="course-rating" step="0.1" min="60" max="80" placeholder="e.g., 72.5">
                         </div>
                     </div>
                     
                     <div class="input-group">
                         <label for="slope"><i class="fas fa-chart-line"></i> SLOPE RATING</label>
                         <div class="input-wrapper">
-                            <input type="number" id="slope" min="55" max="155" placeholder="e.g., 128">
+                            <input type="number" id="slope" min="55" max="155" placeholder="e.g., 130">
                         </div>
                     </div>
                     
                     <div class="input-group">
                         <label for="par"><i class="fas fa-bullseye"></i> COURSE PAR</label>
                         <div class="input-wrapper">
-                            <input type="number" id="par" min="60" max="80" placeholder="e.g., 71">
+                            <input type="number" id="par" min="60" max="80" placeholder="e.g., 72">
                         </div>
                     </div>
                     
@@ -596,7 +596,8 @@
                     
                     <div class="whs-formula">
                         <strong><i class="fas fa-info-circle"></i> WHS Formula:</strong>
-                        Course Handicap = Handicap Index × (Slope Rating ÷ 113)<br>
+                        Course Handicap = Handicap Index × (Slope Rating / 113) + (Course Rating - Par)<br>
+                        Course Handicap = Handicap Index × (Slope Rating ÷ 113) + (Course Rating - Par)<br>
                         Playing Handicap = Course Handicap × (Percentage ÷ 100)<br>
                         Strokes Received = Round(Playing Handicap)<br><br>
                         Handicap Index® x (Slope Rating/113) = Course HandicapSource
@@ -790,14 +791,17 @@
                 return;
             }
             
-            // Calculate course handicap: Index × (Slope ÷ 113)
-            let courseHandicap = index * (slope / 113);
+            // Calculate course handicap: Index × (Slope ÷ 113) + (Course Rating - Par)
+            let courseHandicap = index * (slope / 113) + (courseRating - par);
             
-            // Calculate playing handicap: Course Handicap × Percentage
-            let playingHandicap = courseHandicap * (percentage / 100);
+            // Round course handicap first
+            let roundedCourseHandicap = Math.round(courseHandicap);
             
-            // Round playing handicap to nearest whole number
-            let roundedPlayingHandicap = Math.round(playingHandicap);
+            // Calculate playing handicap: Rounded Course Handicap × Percentage
+            let playingHandicap = roundedCourseHandicap * (percentage / 100);
+            
+            // Round playing handicap - use floor (round down) for percentages < 100%, otherwise round normally
+            let roundedPlayingHandicap = (percentage < 100) ? Math.floor(playingHandicap) : Math.round(playingHandicap);
             
             // Calculate strokes received (difference from par)
             let strokesReceived = roundedPlayingHandicap;
